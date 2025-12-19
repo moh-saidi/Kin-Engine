@@ -23,7 +23,7 @@ This project requires **no build step** or server installation.
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/kin-builder.git
+    git clone https://github.com/moh-saidi/Kin-Engine.git
     ```
 2.  Open `index.html` in your web browser.
 3.  Start creating!
