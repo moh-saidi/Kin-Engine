@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2025 Mohamed Saidi. Kol el 7uquq ma7foudha. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Mohamed Saidi">
+    <meta name="copyright" content="Mohamed Saidi. Kol el 7uquq ma7foudha.">
+    <title>Kin Builder</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="d-flex align-items-center gap-3">
+            <span class="fw-bold text-light"><i class="fa-solid fa-cube me-2"></i>Kin Builder</span>
+            <div class="btn-group btn-group-sm">
+                <button id="btn-save-map" class="btn btn-outline-secondary text-light border-0"><i class="fa-solid fa-download me-1"></i> Save (JSON)</button>
+                <button id="btn-import-map" class="btn btn-outline-secondary text-light border-0"><i class="fa-solid fa-upload me-1"></i> Import</button>
+                <button id="btn-load-demo" class="btn btn-outline-secondary text-light border-0"><i class="fa-solid fa-book-open me-1"></i> Load Demo</button>
+                <button id="btn-clear-map" class="btn btn-outline-secondary text-light border-0"><i class="fa-solid fa-trash me-1"></i> Clear</button>
+                <div class="vr mx-2 bg-secondary"></div>
+                <button id="btn-undo" class="btn btn-outline-secondary text-light border-0" title="Undo (Ctrl+Z)"><i class="fa-solid fa-rotate-left"></i></button>
+                <button id="btn-redo" class="btn btn-outline-secondary text-light border-0" title="Redo (Ctrl+Y)"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <input type="file" id="map-upload" class="d-none" accept=".json">
+        </div>
+        
+        <div class="btn-group" role="group">
+            <button id="btn-edit-mode" class="btn btn-sm btn-outline-primary active px-4"><i class="fa-solid fa-pen-ruler me-2"></i>Edit</button>
+            <button id="btn-play-mode" class="btn btn-sm btn-outline-success px-4"><i class="fa-solid fa-play me-2"></i>Play</button>
+        </div>
+    </header>
+
+    <div class="app-main">
+        
+        <div class="panel" id="panel-left">
+            <div class="panel-header">Assets & Palette</div>
+            <div class="panel-content">
+                
+                <div class="section-title">Import Tileset</div>
+                <div class="mb-3">
+                    <button id="btn-open-import" class="btn btn-sm btn-primary w-100"><i class="fa-solid fa-images me-2"></i> Import New Tileset</button>
+                    <input type="file" id="tileset-upload" class="d-none" accept="image/*">
+                </div>
+
+                <div class="section-title">Tile Palette</div>
+                <select id="palette-select" class="form-select form-select-sm mb-2">
+                    <option value="all">All Palettes</option>
+                    <option value="basic">Basic Tiles</option>
+                    <option value="animated">Animated Tiles</option>
+                </select>
+                <div id="tile-palette">
+                </div>
+
+                <div class="section-title">Animated Tiles</div>
+                <div class="accordion" id="accordionAnimTiles">
+                    <div class="accordion-item bg-dark border-secondary">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed bg-dark text-light shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnimTiles">
+                                <small>Create Animation</small>
+                            </button>
+                        </h2>
+                        <div id="collapseAnimTiles" class="accordion-collapse collapse" data-bs-parent="#accordionAnimTiles">
+                            <div class="accordion-body p-2">
+                                <div class="mb-2">
+                                    <button id="btn-record-anim-tile" class="btn btn-sm btn-outline-info w-100 mb-2">
+                                        <i class="fa-solid fa-circle-dot me-1"></i> Record Frames
+                                    </button>
+                                    <div id="anim-tile-preview" class="d-flex gap-1 overflow-auto bg-dark p-1 rounded border border-secondary mb-2" style="min-height: 34px;">
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small text-muted mb-1">Speed (ms/frame)</label>
+                                    <input type="number" id="anim-tile-speed" class="form-control form-control-sm" value="200" step="50" min="50">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small text-muted mb-1">Tile Name (Optional)</label>
+                                    <input type="text" id="anim-tile-name" class="form-control form-control-sm" placeholder="e.g. Water Flow">
+                                </div>
+                                <button id="btn-save-anim-tile" class="btn btn-sm btn-primary w-100" disabled>Create Tile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Audio Manager</div>
+                <div class="accordion" id="accordionAudio">
+                    <div class="accordion-item bg-dark border-secondary">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed bg-dark text-light shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAudio">
+                                <small>Manage Sounds</small>
+                            </button>
+                        </h2>
+                        <div id="collapseAudio" class="accordion-collapse collapse" data-bs-parent="#accordionAudio">
+                            <div class="accordion-body p-2">
+                                <div class="mb-2">
+                                    <button id="btn-import-audio" class="btn btn-sm btn-outline-warning w-100 mb-2">
+                                        <i class="fa-solid fa-music me-1"></i> Import Audio
+                                    </button>
+                                    <input type="file" id="audio-upload" class="d-none" accept="audio/*">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small text-muted mb-1">Map BGM</label>
+                                    <select id="map-bgm-select" class="form-select form-select-sm bg-dark text-light border-secondary">
+                                        <option value="">None</option>
+                                    </select>
+                                </div>
+                                <div id="audio-list" class="d-flex flex-column gap-1">
+                                    <!-- Audio items will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Player Sprites</div>
+                <div class="accordion" id="accordionPlayer">
+                    <div class="accordion-item bg-dark border-secondary">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed bg-dark text-light shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlayer">
+                                <small>Customize Appearance</small>
+                            </button>
+                        </h2>
+                        <div id="collapsePlayer" class="accordion-collapse collapse" data-bs-parent="#accordionPlayer">
+                            <div class="accordion-body p-2">
+                                <div class="mb-3 border-bottom border-secondary pb-2">
+                                    <label class="form-label small text-muted mb-1">Player Size</label>
+                                    
+                                    <div class="d-flex gap-2 mb-2">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-dark border-secondary text-muted">Tiles W</span>
+                                            <input type="number" id="player-tiles-w" class="form-control bg-dark text-light border-secondary" value="0.63" step="0.1">
+                                        </div>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-dark border-secondary text-muted">Tiles H</span>
+                                            <input type="number" id="player-tiles-h" class="form-control bg-dark text-light border-secondary" value="0.63" step="0.1">
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-dark border-secondary text-muted">Px W</span>
+                                            <input type="number" id="player-w" class="form-control bg-dark text-light border-secondary" value="20">
+                                        </div>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-dark border-secondary text-muted">Px H</span>
+                                            <input type="number" id="player-h" class="form-control bg-dark text-light border-secondary" value="20">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="chk-custom-sprite-size">
+                                        <label class="form-check-label small text-muted" for="chk-custom-sprite-size">Custom Sprite Size (Stretch)</label>
+                                    </div>
+
+                                    <div id="custom-sprite-size-container" class="d-none mt-2">
+                                        <div class="d-flex gap-2">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-dark border-secondary text-muted">Spr W</span>
+                                                <input type="number" id="player-sprite-w" class="form-control bg-dark text-light border-secondary" value="20">
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-dark border-secondary text-muted">Spr H</span>
+                                                <input type="number" id="player-sprite-h" class="form-control bg-dark text-light border-secondary" value="20">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.8rem;">
+                                    <i class="fa-solid fa-circle-info me-1"></i> Import a tileset first, then click "Record" and select tiles from the palette to build animations.
+                                </div>
+
+                                <div id="player-anim-controls">
+                                </div>
+
+                                <button id="btn-clear-player-sprites" class="btn btn-sm btn-outline-danger w-100 mt-2">Reset All Animations</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Collision Shapes</div>
+                
+                <div id="collision-hint" class="text-muted small mb-2">
+                    <i class="fa-solid fa-info-circle me-1"></i> Click "Edit Collisions" in toolbar to enable.
+                </div>
+
+                <div id="collision-tools" class="d-none bg-dark border border-secondary rounded p-2">
+                    <div class="d-flex flex-wrap gap-1 mb-2" id="collision-palette">
+                    </div>
+                    <hr class="border-secondary my-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chk-collision-eraser">
+                        <label class="form-check-label small" for="chk-collision-eraser">Eraser Mode</label>
+                    </div>
+                </div>
+
+                <div class="section-title">Game Controls</div>
+                <div class="mb-3">
+                    <div class="d-flex flex-column gap-2" id="controls-config">
+                    </div>
+                    <button id="btn-reset-controls" class="btn btn-sm btn-outline-secondary w-100 mt-2">Reset to Default</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="viewport">
+            <div class="viewport-toolbar" id="viewport-toolbar">
+                <div class="btn-group btn-group-sm me-3">
+                    <button class="btn btn-tool btn-outline-secondary" id="btn-tool-select" title="Select / Inspect"><i class="fa-solid fa-arrow-pointer"></i></button>
+                    <button class="btn btn-tool btn-outline-secondary active" id="btn-tool-brush" title="Brush Tool"><i class="fa-solid fa-paintbrush"></i></button>
+                    <button class="btn btn-tool btn-outline-secondary" id="btn-tool-bucket" title="Fill Tool"><i class="fa-solid fa-fill-drip"></i></button>
+                    <button class="btn btn-tool btn-outline-secondary" id="btn-tool-spawn" title="Set Player Spawn"><i class="fa-solid fa-location-dot"></i></button>
+                </div>
+
+                <div class="btn-group btn-group-sm me-3">
+                    <button class="btn btn-tool btn-outline-secondary" id="btn-zoom-out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                    <button class="btn btn-tool btn-outline-secondary" id="btn-zoom-reset">100%</button>
+                    <button class="btn btn-tool btn-outline-secondary" id="btn-zoom-in"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                </div>
+
+                <div class="vr bg-secondary mx-2" style="height: 20px;"></div>
+
+                <button id="btn-toggle-collision" class="btn btn-sm btn-outline-warning" title="Toggle Collision Editing">
+                    <i class="fa-solid fa-layer-group me-1"></i> <span id="btn-collision-text">Edit Collisions</span>
+                </button>
+            </div>
+
+            <div id="editor-container" class="d-flex flex-column flex-grow-1 overflow-hidden">
+                <div id="editor-grid-container">
+                    <canvas id="editor-canvas"></canvas>
+                </div>
+            </div>
+
+            <div id="game-container" class="d-none position-relative">
+                <canvas id="game-canvas" width="800" height="600"></canvas>
+                
+                <div id="game-interaction-prompt" class="position-absolute top-50 start-50 translate-middle mt-5 d-none">
+                    <div class="badge bg-dark border border-light text-light px-3 py-2 shadow" style="font-size: 1rem;">
+                        <i class="fa-solid fa-hand-pointer me-2"></i> Press <span class="badge bg-light text-dark border border-secondary">E</span> to Interact
+                    </div>
+                </div>
+
+                <div id="game-dialogue-box" class="position-absolute bottom-0 start-0 w-100 p-4 d-none">
+                    <div class="bg-dark border border-light rounded p-3 shadow-lg text-light" style="min-height: 100px; opacity: 0.95;">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="text-info mb-0"><i class="fa-solid fa-comment-dots me-2"></i>Message</h6>
+                            <small class="text-muted">Press E to close</small>
+                        </div>
+                        <p id="game-dialogue-text" class="mb-0" style="font-size: 1.1rem; line-height: 1.5;">
+                            ...
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-3 text-muted small">
+                    <i class="fa-solid fa-keyboard me-1"></i> WASD / Arrows to Move &nbsp;|&nbsp; <button id="btn-restart" class="btn btn-sm btn-outline-warning ms-2">Restart</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-right" id="panel-right">
+            <div class="panel-header">Inspector</div>
+            <div class="panel-content">
+                
+                <div id="inspector-cell-properties" class="d-none mb-3">
+                    <div class="section-title text-warning"><i class="fa-solid fa-location-crosshairs me-1"></i> Selected Cell</div>
+                    <div class="bg-dark border border-warning rounded p-2">
+                        <div class="small text-muted mb-2" id="inspector-cell-coords">X: - , Y: -</div>
+                        
+                        <!-- Event Type Selector -->
+                        <label class="form-label small text-light mb-1">Event Type</label>
+                        <select id="inspector-event-type" class="form-select form-select-sm bg-dark text-light border-secondary mb-2">
+                            <option value="">None</option>
+                            <option value="sign">Sign / Dialogue</option>
+                            <option value="chest">Chest</option>
+                            <option value="teleport">Teleport</option>
+                        </select>
+
+                        <!-- Sign Properties -->
+                        <div id="props-sign" class="d-none">
+                            <label class="form-label small text-light mb-1">Text</label>
+                            <textarea id="inspector-cell-dialogue" class="form-control form-control-sm bg-dark text-light border-secondary mb-2" rows="3" placeholder="Enter text... Use | to separate pages."></textarea>
+                        </div>
+
+                        <!-- Chest Properties -->
+                        <div id="props-chest" class="d-none">
+                            <label class="form-label small text-light mb-1">Item Name</label>
+                            <input type="text" id="inspector-chest-item" class="form-control form-control-sm bg-dark text-light border-secondary mb-2" placeholder="e.g. Gold Key">
+                            <label class="form-label small text-light mb-1">Open Tile ID</label>
+                            <input type="number" id="inspector-chest-tile" class="form-control form-control-sm bg-dark text-light border-secondary mb-2" placeholder="Tile ID when opened">
+                        </div>
+
+                        <!-- Teleport Properties -->
+                        <div id="props-teleport" class="d-none">
+                            <div class="d-flex gap-2">
+                                <div>
+                                    <label class="form-label small text-light mb-1">Target X</label>
+                                    <input type="number" id="inspector-teleport-x" class="form-control form-control-sm bg-dark text-light border-secondary">
+                                </div>
+                                <div>
+                                    <label class="form-label small text-light mb-1">Target Y</label>
+                                    <input type="number" id="inspector-teleport-y" class="form-control form-control-sm bg-dark text-light border-secondary">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <label class="form-label small text-light mb-1 mt-2">Sound Trigger</label>
+                        <select id="inspector-cell-sound" class="form-select form-select-sm bg-dark text-light border-secondary mb-2">
+                            <option value="">None</option>
+                        </select>
+
+                        <div class="form-text small text-muted" style="font-size: 0.7rem;">
+                            Configure events for this tile.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Selected Tile</div>
+                <div id="inspector-tile-properties" class="mb-3 p-2 bg-dark border border-secondary rounded">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div id="inspector-tile-preview" style="width: 32px; height: 32px; border: 1px solid #555; background-color: #222;"></div>
+                        <div class="small text-muted" id="inspector-tile-id">ID: -</div>
+                    </div>
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-dark border-secondary text-muted">Name</span>
+                        <input type="text" id="inspector-tile-name" class="form-control bg-dark text-light border-secondary" placeholder="Tile Name" disabled>
+                    </div>
+                    <div id="inspector-anim-speed-container" class="d-none">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-dark border-secondary text-muted">Speed</span>
+                            <input type="number" id="inspector-anim-speed" class="form-control bg-dark text-light border-secondary" step="10" min="10">
+                            <span class="input-group-text bg-dark border-secondary text-muted">ms</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Map Properties</div>
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-1">Tile Size (Global)</label>
+                    <select id="map-tile-size" class="form-select form-select-sm bg-dark text-light border-secondary">
+                        <option value="16">16px</option>
+                        <option value="32" selected>32px</option>
+                        <option value="48">48px</option>
+                        <option value="64">64px</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2 mb-2">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-dark border-secondary text-muted">W</span>
+                        <input type="number" id="map-w" class="form-control" value="100">
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-dark border-secondary text-muted">H</span>
+                        <input type="number" id="map-h" class="form-control" value="20">
+                    </div>
+                </div>
+                <button id="btn-resize-map" class="btn btn-sm btn-outline-secondary w-100 mb-3">Apply Size</button>
+
+                <div class="section-title">Layers</div>
+                <div class="bg-dark border border-secondary rounded p-2 mb-2">
+                    <select id="layer-select" class="form-select form-select-sm mb-2 bg-dark text-light border-secondary" size="5" style="overflow-y: auto;">
+                        <option value="0">Layer 1</option>
+                    </select>
+                    <div class="btn-group w-100 btn-group-sm">
+                        <button id="btn-add-layer" class="btn btn-outline-secondary" title="Add Layer"><i class="fa-solid fa-plus"></i></button>
+                        <button id="btn-remove-layer" class="btn btn-outline-secondary" title="Remove Layer"><i class="fa-solid fa-minus"></i></button>
+                        <button id="btn-layer-up" class="btn btn-outline-secondary" title="Move Up"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button id="btn-layer-down" class="btn btn-outline-secondary" title="Move Down"><i class="fa-solid fa-arrow-down"></i></button>
+                    </div>
+                </div>
+
+                <div class="section-title">Player Depth</div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text bg-dark border-secondary text-muted">Render On</span>
+                    <select id="player-layer-select" class="form-select bg-dark text-light border-secondary">
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="tilesetModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Import Tileset</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Tile Size</label>
+                                <div class="input-group input-group-sm mb-2">
+                                    <span class="input-group-text bg-secondary text-light border-secondary">W</span>
+                                    <input type="number" id="modal-tile-w" class="form-control bg-dark text-light border-secondary" value="32" min="1">
+                                    <span class="input-group-text bg-secondary text-light border-secondary">px</span>
+                                </div>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-secondary text-light border-secondary">H</span>
+                                    <input type="number" id="modal-tile-h" class="form-control bg-dark text-light border-secondary" value="32" min="1">
+                                    <span class="input-group-text bg-secondary text-light border-secondary">px</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Grid Info</label>
+                                <div class="text-muted small" id="modal-grid-info">
+                                    - Columns x - Rows
+                                </div>
+                            </div>
+                            <div class="alert alert-secondary small">
+                                Adjust width and height to match your spritesheet grid.
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="border border-secondary overflow-auto bg-secondary" style="max-height: 400px; position: relative; text-align: center;">
+                                <canvas id="tileset-preview-canvas" style="max-width: 100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn-confirm-import">Import Tiles</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/constants.js"></script>
+    
+    <script src="js/editor/EditorCore.js"></script>
+    <script src="js/editor/EditorDrawing.js"></script>
+    <script src="js/editor/EditorInput.js"></script>
+    <script src="js/editor/EditorTools.js"></script>
+    <script src="js/editor/EditorUI.js"></script>
+    <script src="js/editor/EditorAudioUI.js"></script>
+    <script src="js/editor/EditorIO.js"></script>
+
+    <script src="js/game/GameCore.js"></script>
+    <script src="js/game/GameEntities.js"></script>
+    <script src="js/game/GameEvents.js"></script>
+    <script src="js/game/GamePhysics.js"></script>
+    <script src="js/game/GameRender.js"></script>
+    <script src="js/game/GameInput.js"></script>
+
+    <script src="js/audio/AudioManager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
