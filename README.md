@@ -2,6 +2,8 @@
 
 **Kin Builder** is a lightweight, web-based 2D game engine and level editor built entirely with vanilla JavaScript. It allows users to design tile-based maps, define collisions, add audio triggers, and play the created levels instantly in the browser.
 
+![Kin Builder Screenshot](https://i.ibb.co/PGQ3Jckt/Screenshot-2025-11-27-173105.png)
+
 ## 🎮 Features
 
 ### Level Editor
