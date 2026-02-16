@@ -18,6 +18,7 @@
 *   **Rendering:** Efficient canvas-based rendering with camera follow and zoom support.
 *   **Animation:** Frame-based animation system for players and tiles.
 *   **Audio:** robust `AudioManager` using the Web Audio API for BGM and SFX.
+*   **Scripting:** attach JavaScript snippets to tile events (signs/chests/teleport/script). Scripts run with a limited `api` (e.g. `api.playSFX`, `api.playBGM`, `api.setTile`, `api.getTile`, `api.teleportPlayer`, `api.spawnEntity`, `api.showDialogue`, `api.setVar`/`api.getVar`) — editable in the inspector and executed safely at runtime.
 
 ## 🚀 How to Run
 

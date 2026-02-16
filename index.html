@@ -116,6 +116,33 @@
                     </div>
                 </div>
 
+                <div class="section-title">Scripts</div>
+                <div class="accordion" id="accordionScripts">
+                    <div class="accordion-item bg-dark border-secondary">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed bg-dark text-light shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseScripts">
+                                <small>Script Assets</small>
+                            </button>
+                        </h2>
+                        <div id="collapseScripts" class="accordion-collapse collapse" data-bs-parent="#accordionScripts">
+                            <div class="accordion-body p-2">
+                                <div class="d-flex gap-1 mb-2">
+                                    <input id="script-name" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Script name">
+                                    <button id="btn-new-script" class="btn btn-sm btn-outline-success">New</button>
+                                </div>
+                                <textarea id="script-editor" class="form-control form-control-sm bg-dark text-light border-secondary mb-2" rows="6" placeholder="function(exports, game, entity, api) {\n  // set exports.update = function(game, entity, dt) { ... }\n}"></textarea>
+                                <div class="d-flex gap-2 mb-2">
+                                    <button id="btn-save-script" class="btn btn-sm btn-primary">Save Script</button>
+                                    <button id="btn-delete-script" class="btn btn-sm btn-danger">Delete</button>
+                                    <button id="btn-run-script" class="btn btn-sm btn-outline-success">Run (preview)</button>
+                                    <button id="btn-add-scene-script" class="btn btn-sm btn-outline-info">Add to Scene</button>
+                                </div>
+                                <div id="scripts-list" class="d-flex flex-column gap-1" style="max-height:120px; overflow:auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-title">Player Sprites</div>
                 <div class="accordion" id="accordionPlayer">
                     <div class="accordion-item bg-dark border-secondary">
@@ -325,7 +352,12 @@
                         <select id="inspector-cell-sound" class="form-select form-select-sm bg-dark text-light border-secondary mb-2">
                             <option value="">None</option>
                         </select>
-
+                        <label class="form-label small text-light mb-1 mt-2">Attach Script (Entity)</label>
+                        <div class="d-flex gap-1 mb-2">
+                            <select id="inspector-attach-script-select" class="form-select form-select-sm bg-dark text-light border-secondary"></select>
+                            <button id="inspector-attach-script-btn" class="btn btn-sm btn-outline-success">Attach</button>
+                            <button id="inspector-detach-script-btn" class="btn btn-sm btn-outline-danger">Detach</button>
+                        </div>
                         <div class="form-text small text-muted" style="font-size: 0.7rem;">
                             Configure events for this tile.
                         </div>
@@ -460,6 +492,7 @@
     <script src="js/game/GameCore.js"></script>
     <script src="js/game/GameEntities.js"></script>
     <script src="js/game/GameEvents.js"></script>
+    <script src="js/game/ScriptingEngine.js"></script>
     <script src="js/game/GamePhysics.js"></script>
     <script src="js/game/GameRender.js"></script>
     <script src="js/game/GameInput.js"></script>

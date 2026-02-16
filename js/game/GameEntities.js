@@ -139,6 +139,14 @@ class EntityManager {
 
     update() {
         this.entities.forEach(e => e.update());
+        // notify scripting engine for entities being removed
+        if (this.game && this.game.scripting) {
+            for (const e of this.entities) {
+                if (e.isDead) {
+                    try { this.game.scripting.destroyEntityInstance(e); } catch (err) { /* ignore */ }
+                }
+            }
+        }
         this.entities = this.entities.filter(e => !e.isDead);
     }
 

@@ -150,12 +150,9 @@ class Game {
 
         for (let l = 0; l < this.layers.length; l++) {
             const layer = this.layers[l];
-            if (!layer) continue;
             for (let y = 0; y < this.mapHeight; y++) {
-                if (!layer[y]) continue;
                 for (let x = 0; x < this.mapWidth; x++) {
                     const tile = layer[y][x];
-                    if (typeof tile === 'undefined') continue;
                     if (ENTITY_TILES[tile]) {
                         if (ENTITY_TILES[tile] === 'enemy') {
                             this.entityManager.add(new Enemy(this, x * this.tileSize, y * this.tileSize));

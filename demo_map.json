@@ -17,5 +17,9 @@
       "trigger": "step",
       "script": "api.showDialogue('Script: you stepped on 2,1');"
     }
-  }
+  },
+  "scripts": {
+    "announce": "exports.start = function(game){ api.showDialogue('Scene script: welcome to the demo map'); }"
+  },
+  "sceneScripts": ["announce"]
 }

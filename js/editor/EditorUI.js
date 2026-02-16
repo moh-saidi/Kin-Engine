@@ -235,6 +235,100 @@ Editor.prototype.initPlayerAnimationUI = function() {
         { id: 'left', label: 'Moving Left (← / A)' },
         { id: 'right', label: 'Moving Right (→ / D)' }
     ];
+};
+
+// --- Script assets UI -----------------------------------------------------
+Editor.prototype.initScriptsUI = function() {
+    const list = document.getElementById('scripts-list');
+    const nameInput = document.getElementById('script-name');
+    const editor = document.getElementById('script-editor');
+    const btnNew = document.getElementById('btn-new-script');
+    const btnSave = document.getElementById('btn-save-script');
+    const btnDelete = document.getElementById('btn-delete-script');
+    const btnRun = document.getElementById('btn-run-script');
+
+    const refresh = () => this.updateScriptListUI();
+
+    btnNew.onclick = () => {
+        nameInput.value = 'script_' + Date.now();
+        editor.value = '';
+        nameInput.focus();
+    };
+
+    btnSave.onclick = () => {
+        const n = (nameInput.value || '').trim();
+        if (!n) return alert('Script needs a name');
+        this.scripts = this.scripts || {};
+        this.scripts[n] = editor.value || '';
+        refresh();
+        this.isDirty = true;
+    };
+
+    btnDelete.onclick = () => {
+        const n = (nameInput.value || '').trim();
+        if (!n) return;
+        if (!this.scripts || !this.scripts[n]) return alert('No such script');
+        if (!confirm('Delete script "' + n + '"?')) return;
+        delete this.scripts[n];
+        editor.value = '';
+        nameInput.value = '';
+        refresh();
+        this.isDirty = true;
+    };
+
+    btnRun.onclick = () => {
+        const src = editor.value || '';
+        if (!src) return alert('No script source');
+        try {
+            const exports = {};
+            const api = {
+                playSFX: (n) => this.audioManager && this.audioManager.playSFX(n),
+                playBGM: (n) => this.audioManager && this.audioManager.playBGM(n),
+                setTile: (x,y,id,layer=0) => { if (this.layers[layer] && this.layers[layer][y]) { this.layers[layer][y][x]=id; this.needsRedraw=true; } },
+                getTile: (x,y,layer=0) => (this.layers[layer] && this.layers[layer][y]) ? this.layers[layer][y][x] : null,
+                showDialogue: (t) => alert(String(t))
+            };
+            const fn = new Function('exports','game','entity','api', src);
+            fn(exports, this, null, api);
+            alert('Script ran (preview) — check console for errors.');
+        } catch (err) {
+            alert('Script error: ' + err.message);
+            console.error('script preview error', err);
+        }
+    };
+
+    // add to scene scripts
+    const btnAddScene = document.getElementById('btn-add-scene-script');
+    btnAddScene.onclick = () => {
+        const name = (nameInput.value || '').trim();
+        if (!name) return alert('Select or enter a script name first');
+        this.sceneScripts = this.sceneScripts || [];
+        if (!this.sceneScripts.includes(name)) {
+            this.sceneScripts.push(name);
+            this.isDirty = true;
+            alert('Script added to scene scripts');
+        } else {
+            alert('Script already in scene list');
+        }
+    };
+
+    this.updateScriptListUI();
+};
+
+Editor.prototype.updateScriptListUI = function() {
+    const list = document.getElementById('scripts-list');
+    const nameInput = document.getElementById('script-name');
+    const editor = document.getElementById('script-editor');
+    list.innerHTML = '';
+    if (!this.scripts) this.scripts = {};
+    Object.keys(this.scripts).forEach(name => {
+        const row = document.createElement('div');
+        row.className = 'd-flex justify-content-between align-items-center bg-dark border border-secondary p-1 rounded';
+        row.innerHTML = `<div class="text-truncate small text-light" style="max-width:140px">${name}</div>`;
+        row.onclick = () => { nameInput.value = name; editor.value = this.scripts[name] || ''; };
+        list.appendChild(row);
+    });
+};
 
     states.forEach(state => {
         const wrapper = document.createElement('div');
@@ -785,6 +879,19 @@ Editor.prototype.updateInspectorCell = function() {
     const currentSound = this.soundTriggers[key] || '';
     soundSelect.value = currentSound;
     
+    // Populate attach-script select for this cell
+    const attachSelect = document.getElementById('inspector-attach-script-select');
+    attachSelect.innerHTML = '<option value="">(none)</option>';
+    if (this.scripts) {
+        Object.keys(this.scripts).forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name; opt.textContent = name;
+            attachSelect.appendChild(opt);
+        });
+    }
+    const attached = this.entityScripts[key] || '';
+    attachSelect.value = attached;
+
     // Setup Event Listeners for Inputs (Debounced or on change)
     // Note: In a real app, we should remove old listeners to avoid duplicates, 
     // but for simplicity we'll just re-assign onchange which overwrites the old one.
@@ -840,5 +947,22 @@ Editor.prototype.updateInspectorCell = function() {
             delete this.soundTriggers[key];
         }
         this.isDirty = true;
+    };
+
+    // Attach / detach script buttons
+    const attachBtn = document.getElementById('inspector-attach-script-btn');
+    const detachBtn = document.getElementById('inspector-detach-script-btn');
+    attachBtn.onclick = () => {
+        const val = attachSelect.value;
+        if (!val) return alert('Select a script to attach');
+        this.entityScripts[key] = val;
+        this.isDirty = true;
+        this.draw();
+    };
+    detachBtn.onclick = () => {
+        delete this.entityScripts[key];
+        this.isDirty = true;
+        attachSelect.value = '';
+        this.draw();
     };
 };
