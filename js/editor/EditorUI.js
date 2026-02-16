@@ -715,6 +715,7 @@ Editor.prototype.updateInspectorCell = function() {
     document.getElementById('props-sign').classList.add('d-none');
     document.getElementById('props-chest').classList.add('d-none');
     document.getElementById('props-teleport').classList.add('d-none');
+    document.getElementById('props-script')?.classList.add('d-none');
     
     if (event.type === 'sign') {
         document.getElementById('props-sign').classList.remove('d-none');
@@ -727,7 +728,45 @@ Editor.prototype.updateInspectorCell = function() {
         document.getElementById('props-teleport').classList.remove('d-none');
         document.getElementById('inspector-teleport-x').value = (event.target ? event.target.x : 0);
         document.getElementById('inspector-teleport-y').value = (event.target ? event.target.y : 0);
+    } else if (event.type === 'script') {
+        const scriptArea = document.getElementById('inspector-script-content');
+        document.getElementById('props-script').classList.remove('d-none');
+        scriptArea.value = event.script || '';
+
+        scriptArea.onchange = (e) => {
+            if (!this.events[key]) this.events[key] = { type: 'script' };
+            this.events[key].script = e.target.value;
+            this.isDirty = true;
+        };
+
+        document.getElementById('inspector-script-run').onclick = () => {
+            // Run script in editor context with limited API for quick testing
+            const src = scriptArea.value || '';
+            try {
+                const api = {
+                    showDialogue: (t) => alert(String(t)),
+                    playSFX: (n) => this.audioManager && this.audioManager.playSFX(n),
+                    playBGM: (n) => this.audioManager && this.audioManager.playBGM(n),
+                    setTile: (x, y, id, layer = this.currentLayerIndex) => { if (this.layers[layer] && this.layers[layer][y]) { this.layers[layer][y][x] = id; this.needsRedraw = true; } },
+                    getTile: (x, y, layer = this.currentLayerIndex) => { return (this.layers[layer] && this.layers[layer][y]) ? this.layers[layer][y][x] : null; },
+                    teleportPlayer: (x, y) => { this.playerSpawn = { x, y }; this.needsRedraw = true; },
+                    spawnEntity: (type, x, y) => { /* editor: no-op / preview only */ console.log('spawnEntity preview:', type, x, y); }
+                };
+                const fn = new Function('api', src);
+                fn(api);
+            } catch (err) {
+                alert('Script error: ' + err.message);
+                console.error('Inspector script error:', err);
+            }
+        };
+
+        document.getElementById('inspector-script-insert-teleport').onclick = () => {
+            const s = "api.teleportPlayer(10,5); // example";
+            scriptArea.value = (scriptArea.value ? scriptArea.value + '\n' : '') + s;
+            scriptArea.dispatchEvent(new Event('change'));
+        };
     }
+
 
     // Sound Trigger Logic
     const soundSelect = document.getElementById('inspector-cell-sound');

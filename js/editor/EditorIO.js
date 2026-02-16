@@ -137,6 +137,14 @@ Editor.prototype.loadMapData = function(parsed) {
     
     this.dialogues = parsed.dialogues || {};
     this.events = parsed.events || {};
+    // Sanitize events: ensure no non-serializable/action fields are carried over from untrusted sources
+    for (const k of Object.keys(this.events)) {
+        const ev = this.events[k];
+        if (ev && ev.hasOwnProperty('action') && typeof ev.action !== 'function') {
+            // remove any non-function action payload (JSON cannot contain functions anyway)
+            delete ev.action;
+        }
+    }
     this.soundTriggers = parsed.soundTriggers || {};
     this.mapBGM = parsed.mapBGM || "";
 
@@ -335,7 +343,16 @@ Editor.prototype.saveToStorage = function() {
             customTiles[id] = this.getTileDataURL(id);
         }
         data.customTiles = customTiles;
-        localStorage.setItem('rpg_map_autosave', JSON.stringify(data));
+
+        const jsonStr = JSON.stringify(data);
+        // Skip autosave if payload is too large for localStorage (avoid quota errors)
+        const MAX_AUTOSAVE_BYTES = 3.5 * 1024 * 1024; // 3.5MB
+        if (jsonStr.length > MAX_AUTOSAVE_BYTES) {
+            console.warn('Autosave skipped: data too large (' + Math.round(jsonStr.length/1024) + ' KB).');
+            return;
+        }
+
+        localStorage.setItem('rpg_map_autosave', jsonStr);
         this.isDirty = false;
     } catch (e) {
         if (e.name === 'QuotaExceededError') console.warn("Autosave fachel: storage quota.");

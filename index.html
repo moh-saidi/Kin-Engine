@@ -308,6 +308,18 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Script Properties -->
+                        <div id="props-script" class="d-none">
+                            <label class="form-label small text-light mb-1">Script (JavaScript)</label>
+                            <textarea id="inspector-script-content" class="form-control form-control-sm bg-dark text-light border-secondary mb-2" rows="6" placeholder="// example: api.playSFX('coin'); api.setTile(10,5,4);"></textarea>
+                            <div class="d-flex gap-2">
+                                <button id="inspector-script-run" class="btn btn-sm btn-outline-success">Run (test)</button>
+                                <button id="inspector-script-insert-teleport" class="btn btn-sm btn-outline-secondary">Insert Teleport Snippet</button>
+                                <small class="text-muted ms-auto">Use | to separate pages for dialogues elsewhere.</small>
+                            </div>
+                            <div class="form-text small text-muted mt-1">Scripts run with a limited API: <code>api.playSFX</code>, <code>api.playBGM</code>, <code>api.setTile</code>, <code>api.getTile</code>, <code>api.teleportPlayer</code>, <code>api.spawnEntity</code>, <code>api.showDialogue</code>.</div>
+                        </div>
                         
                         <label class="form-label small text-light mb-1 mt-2">Sound Trigger</label>
                         <select id="inspector-cell-sound" class="form-select form-select-sm bg-dark text-light border-secondary mb-2">

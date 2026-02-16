@@ -5,6 +5,31 @@ class EventManager {
         this.events = {};
         this.lastStepX = -1;
         this.lastStepY = -1;
+        this._scriptVars = {}; // persistent storage for scripts
+    }
+
+    // Build the limited runtime API exposed to event scripts
+    _buildScriptAPI() {
+        const game = this.game;
+        const self = this;
+        return {
+            playSFX: (name) => game.audioManager && game.audioManager.playSFX(name),
+            playBGM: (name) => game.audioManager && game.audioManager.playBGM(name),
+            setTile: (x, y, tileId, layer = 0) => {
+                if (!game.layers[layer] || !game.layers[layer][y]) return false;
+                game.layers[layer][y][x] = tileId;
+                return true;
+            },
+            getTile: (x, y, layer = 0) => {
+                if (!game.layers[layer] || !game.layers[layer][y]) return null;
+                return game.layers[layer][y][x];
+            },
+            teleportPlayer: (x, y) => { game.player.x = x * game.tileSize; game.player.y = y * game.tileSize; },
+            spawnEntity: (type, x, y) => { if (type === 'enemy') game.entityManager.add(new Enemy(game, x * game.tileSize, y * game.tileSize)); },
+            showDialogue: (text) => { this.showDialogue(text); },
+            setVar: (k, v) => { self._scriptVars[k] = v; },
+            getVar: (k) => self._scriptVars[k]
+        };
     }
 
     // Chargi l Ahdeth
@@ -109,8 +134,33 @@ class EventManager {
                 break;
                 
             case 'script':
+                // Support either a pre-compiled function (event.action) or a string script (event.script).
                 if (typeof event.action === 'function') {
-                    event.action(this.game);
+                    try {
+                        event.action(this.game);
+                    } catch (err) {
+                        console.error('Script event threw an error:', err);
+                    }
+                } else if (typeof event.script === 'string' && event.script.trim().length > 0) {
+                    // compile on first use and cache
+                    if (!event._compiledScript) {
+                        try {
+                            // function signature: (game, event, api)
+                            event._compiledScript = new Function('game','event','api', event.script);
+                        } catch (err) {
+                            console.error('Script event compile error:', err);
+                            return;
+                        }
+                    }
+
+                    try {
+                        const api = this._buildScriptAPI();
+                        event._compiledScript(this.game, event, api);
+                    } catch (err) {
+                        console.error('Script event runtime error:', err);
+                    }
+                } else {
+                    console.warn('Script event has no executable action or script.');
                 }
                 break;
         }

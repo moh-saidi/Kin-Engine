@@ -215,6 +215,10 @@ class Editor {
             clearInterval(this.autosaveInterval);
             this.autosaveInterval = null;
         }
+        // Remove event listeners added by the editor (prevent conflicts with Play mode)
+        if (typeof this.removeEventListeners === 'function') {
+            try { this.removeEventListeners(); } catch (err) { console.warn('Error removing editor listeners on stop:', err); }
+        }
     }
 
     cleanup() { this.stop(); }
